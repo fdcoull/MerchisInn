@@ -61,3 +61,6 @@ cursor.execute('INSERT INTO rooms (no_king, no_single, accessible) VALUES (1, 2,
 cursor.execute('INSERT INTO rooms (no_king, no_single, accessible) VALUES (1, 2,1)')
 
 conn.commit()
+
+rows = cursor.execute("SELECT * FROM rooms").fetchall()
+print(rows)
