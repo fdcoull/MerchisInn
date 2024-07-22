@@ -1,5 +1,7 @@
 from flask import Flask, g, render_template, request
 import sqlite3
+import configparser
+
 app = Flask(__name__)
 db_location = 'var/merchisinn.db'
 
@@ -24,10 +26,31 @@ def init_db():
             db.cursor().executescript(f.read())
         db.commit()
 
+# Config
+def init(app):
+    config = configparser.ConfigParser()
+    try:
+        print("INIT FUNCTION")
+        config_location = "etc/defaults.cfg"
+        config.read(config_location)
+
+        app.config['DEBUG'] = config.get("config", "debug")
+        app.config['ip_address'] = config.get("config", "ip_address")
+        app.config['port'] = config.get("config", "port")
+        app.config['url'] = config.get("config", "url")
+    except:
+        print("Could not read configs")
+
+init(app)
+
 # Routes
 @app.route('/')
 def home():
     return render_template('home.html')
+
+@app.route('/test')
+def test():
+    return "Hello testing config"
 
 @app.route('/about')
 def about():
