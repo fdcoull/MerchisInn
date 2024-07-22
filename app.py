@@ -1,4 +1,4 @@
-from flask import Flask, g, render_template, request
+from flask import Flask, g, render_template, request, session
 import sqlite3
 import configparser
 
@@ -45,7 +45,7 @@ def init(app):
         print("Load keys")
         keys_location = "etc/key.cfg"
         config.read(keys_location)
-        app.config['secret_key'] = config.get("key", "secret_key")
+        app.config['SECRET_KEY'] = config.get("key", "secret_key")
     except:
         print("Could not read keys")
 
@@ -79,15 +79,29 @@ def register():
         surname = request.form['surname']
         email = request.form['email']
         password = request.form['password']
-
+        
         db = get_db()
         db.cursor().execute('INSERT INTO customers (email, password, first_name, last_name) VALUES ("' + email + '", "' + password + '", "' + firstname + '", "' + surname + '")')
         db.commit()
+
+        session['user_email'] = email
 
         test = firstname + surname + email + password
         return test
     else:
         return render_template('register.html')
+
+@app.route('/getsession')
+def getsession():
+    email = session.get('user_email')
+    if email is not None:
+        return 'Email: ' + email
+    return 'Not logged in'
+
+@app.route('/delsession')
+def delsession():
+    session.pop('user_email', None)
+    return "Logged out"
 
 if __name__ == ("__main__"):
     app.run(host='0.0.0.0', debug=True)
