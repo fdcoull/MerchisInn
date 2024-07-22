@@ -41,6 +41,14 @@ def init(app):
     except:
         print("Could not read configs")
 
+    try:
+        print("Load keys")
+        keys_location = "etc/key.cfg"
+        config.read(keys_location)
+        app.config['secret_key'] = config.get("key", "secret_key")
+    except:
+        print("Could not read keys")
+
 init(app)
 
 # Routes
@@ -50,7 +58,7 @@ def home():
 
 @app.route('/test')
 def test():
-    return "Hello testing config"
+    return app.config['secret_key']
 
 @app.route('/about')
 def about():
