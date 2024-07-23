@@ -1,6 +1,8 @@
-from flask import Flask, g, render_template, request, session
+from flask import Flask, g, render_template, request, session, redirect, url_for
 import sqlite3
 import configparser
+import bcrypt
+from functools import wraps
 
 app = Flask(__name__)
 db_location = 'var/merchisinn.db'
@@ -51,6 +53,32 @@ def init(app):
 
 init(app)
 
+# Login system
+def check_auth(email, password):
+    if(email == valid_email and valid_pwhash == bcyrpt.hashpw(password.encode('utf-8'), valid_pwhash)):
+        return True
+    return false
+
+def requires_login(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        status = session.get('logged_in', False)
+        if not status:
+            return redirect(url_for('.home'))
+        return f(*args, **kwargs)
+    return decorated
+
+@app.route('/logout')
+def logout():
+    session['logged_in'] = False
+    session['user_email'] = ""
+    return redirect(url_for('.home'))
+
+@app.route('/secret')
+@requires_login
+def secret():
+    return "Secret page"
+
 # Routes
 @app.route('/')
 def home():
@@ -66,11 +94,34 @@ def about():
 
 @app.route('/account')
 def account():
-    return render_template('account.html')
+    status = session.get('logged_in', False)
+    if status:
+        email = session.get('user_email')
+        if email is not None:
+            return render_template('account.html')
+        else:
+            return redirect(url_for('.logout'))
+    else:
+        return redirect(url_for('.login'))
 
-@app.route('/login')
+@app.route('/login', methods=['GET', 'POST'])
 def login():
-    return render_template('login.html')
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+
+        db = get_db()
+        rows = db.cursor().execute('SELECT password FROM customers WHERE email="' + email + '"').fetchall()
+        
+        if rows[0][0].encode('utf-8') == bcrypt.hashpw(password.encode('utf-8'), rows[0][0].encode('utf-8')):
+            
+            session['user_email'] = email
+            session['logged_in'] = True
+            return redirect(url_for('.account'))
+        else:
+            return redirect(url_for('.login'))
+    else:
+        return render_template('login.html')
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -79,12 +130,14 @@ def register():
         surname = request.form['surname']
         email = request.form['email']
         password = request.form['password']
+        passwordHashed = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
         
         db = get_db()
-        db.cursor().execute('INSERT INTO customers (email, password, first_name, last_name) VALUES ("' + email + '", "' + password + '", "' + firstname + '", "' + surname + '")')
+        db.cursor().execute('INSERT INTO customers (email, password, first_name, last_name) VALUES ("' + email + '", "' + passwordHashed.decode('utf-8') + '", "' + firstname + '", "' + surname + '")')
         db.commit()
 
         session['user_email'] = email
+        session['logged_in'] = True
 
         test = firstname + surname + email + password
         return test
