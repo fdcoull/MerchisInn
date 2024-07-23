@@ -53,32 +53,6 @@ def init(app):
 
 init(app)
 
-# Login system
-def check_auth(email, password):
-    if(email == valid_email and valid_pwhash == bcyrpt.hashpw(password.encode('utf-8'), valid_pwhash)):
-        return True
-    return false
-
-def requires_login(f):
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        status = session.get('logged_in', False)
-        if not status:
-            return redirect(url_for('.home'))
-        return f(*args, **kwargs)
-    return decorated
-
-@app.route('/logout')
-def logout():
-    session['logged_in'] = False
-    session['user_email'] = ""
-    return redirect(url_for('.home'))
-
-@app.route('/secret')
-@requires_login
-def secret():
-    return "Secret page"
-
 # Routes
 @app.route('/')
 def home():
@@ -143,6 +117,12 @@ def register():
         return test
     else:
         return render_template('register.html')
+
+@app.route('/logout')
+def logout():
+    session['logged_in'] = False
+    session['user_email'] = ""
+    return redirect(url_for('.home'))
 
 @app.route('/getsession')
 def getsession():
