@@ -68,7 +68,11 @@ def account():
     if status:
         email = session.get('user_email')
         if email is not None:
-            return render_template('account.html')
+            db = get_db()
+            rows = db.cursor().execute('SELECT * from customers WHERE email = "'+ email +'"').fetchall()
+            
+            bookings = db.cursor().execute('SELECT * from bookings WHERE customer_id = '+ str(rows[0][0])).fetchall()
+            return render_template('account.html', email=rows[0][1], firstname=rows[0][3], surname=rows[0][4], bookings=bookings)
         else:
             return redirect(url_for('.logout'))
     else:
