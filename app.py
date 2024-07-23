@@ -3,6 +3,7 @@ import sqlite3
 import configparser
 import bcrypt
 from functools import wraps
+from datetime import datetime
 
 app = Flask(__name__)
 db_location = 'var/merchisinn.db'
@@ -135,6 +136,7 @@ def book():
         guests = request.form['guests']
         accessible = request.form['accessible']
 
+
         if status:
             db = get_db()
 
@@ -146,10 +148,22 @@ def book():
             rows = db.cursor().execute('SELECT id FROM customers WHERE email="' + email + '"').fetchall()
             customerid = rows[0][0]
             
+            preorderdifference = datetime.strptime(checkin, '%Y-%m-%d').date() - datetime.now().date()
+            preorderdays = preorderdifference.days
+
+            if preorderdays == 0:
+                pricemultiplier = 1.5
+            elif preorderdays == 1:
+                pricemultiplier = 1.25
+            else:
+                pricemultiplier = 1
+
             if room == "king":
                 #Check king rooms
                 rows = db.cursor().execute('SELECT * FROM rooms WHERE (id <= 5 AND id NOT IN (SELECT room_id FROM bookings WHERE check_in<="'+ checkout +'" AND check_out>="'+ checkin +'"))').fetchall()
                 
+                price = 60 * pricemultiplier
+
                 if len(rows) >= 1:
                     roomid = rows[0][0]
                 else:
@@ -159,6 +173,8 @@ def book():
                 #Check king singles
                 rows = db.cursor().execute('SELECT * FROM rooms WHERE (id >= 6 AND id <= 7 AND id NOT IN (SELECT room_id FROM bookings WHERE check_in<="'+ checkout +'" AND check_out>="'+ checkin +'"))').fetchall()
 
+                price = 70 * pricemultiplier
+
                 if len(rows) >= 1:
                     roomid = rows[0][0]
                 else:
@@ -166,6 +182,8 @@ def book():
             elif room == "family":
                 #Check family
                 rows = db.cursor().execute('SELECT * FROM rooms WHERE (id >= 8 AND id <= 9 AND id NOT IN (SELECT room_id FROM bookings WHERE check_in<="'+ checkout +'" AND check_out>="'+ checkin +'"))').fetchall()
+
+                price = 80 * pricemultiplier
 
                 if len(rows) >= 1:
                     roomid = rows[0][0]
@@ -175,6 +193,8 @@ def book():
                 #Check accessible
                 rows = db.cursor().execute('SELECT * FROM rooms WHERE (id == 10 AND id NOT IN (SELECT room_id FROM bookings WHERE check_in<="'+ checkout +'" AND check_out>="'+ checkin +'"))').fetchall()
 
+                price = 80 * pricemultiplier
+
                 if len(rows) >= 1:
                     roomid = rows[0][0]
                 else:
@@ -183,10 +203,16 @@ def book():
             else:
                 return redirect(url_for('.book'))
             
-            db.cursor().execute('INSERT INTO bookings (customer_id, room_id, check_in, check_out, no_guests, accessible) VALUES ('+ str(customerid) +', '+ str(roomid) +', "'+ checkin +'", "'+ checkout +'", '+ str(guests) +', '+ str(accessible) +')')
+            staylength = datetime.strptime(checkout, '%Y-%m-%d').date() - datetime.strptime(checkin, '%Y-%m-%d').date()
+            staylengthdays = staylength.days
+
+            totalprice = staylengthdays * price
+            formattedprice = "%.2f" % totalprice
+
+            db.cursor().execute('INSERT INTO bookings (customer_id, room_id, check_in, check_out, no_guests, accessible, price) VALUES ('+ str(customerid) +', '+ str(roomid) +', "'+ checkin +'", "'+ checkout +'", '+ str(guests) +', '+ str(accessible) +', '+ formattedprice +')')
             db.commit()
 
-            return redirect(url_for('.confirm', room=roomid, checkin=checkin, checkout=checkout, guests=guests, accessible=accessible))
+            return redirect(url_for('.confirm', room=roomid, checkin=checkin, checkout=checkout, guests=guests, accessible=accessible, preorderdays=preorderdays, price=totalprice))
         else:
             return redirect(url_for('.login'))
     else:
@@ -199,7 +225,8 @@ def confirm():
     checkout = request.args.get('checkout', '')
     guests = request.args.get('guests', '')
     accessible = request.args.get('accessible', '')
-    return render_template('confirm.html', room=room, checkin=checkin, checkout=checkout, guests=guests, accessible=accessible)
+    price = request.args.get('price', '')
+    return render_template('confirm.html', room=room, checkin=checkin, checkout=checkout, guests=guests, accessible=accessible, price=price)
 
 @app.route('/getsession')
 def getsession():

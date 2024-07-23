@@ -21,7 +21,8 @@ CREATE TABLE bookings (
         check_in TEXT,
         check_out TEXT,
         no_guests INTEGER,
-        accessible INTEGER
+        accessible INTEGER,
+	price REAL
 );
 
 CREATE TABLE rooms (
