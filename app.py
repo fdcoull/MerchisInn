@@ -58,10 +58,6 @@ init(app)
 def home():
     return render_template('home.html')
 
-@app.route('/test')
-def test():
-    return app.config['secret_key']
-
 @app.route('/about')
 def about():
     return render_template('about.html')
@@ -123,6 +119,39 @@ def logout():
     session['logged_in'] = False
     session['user_email'] = ""
     return redirect(url_for('.home'))
+
+@app.route('/book', methods=['GET', 'POST'])
+def book():
+    if request.method == 'POST':
+        status = session.get('logged_in', False)
+
+        checkin = request.form['checkin']
+        checkout = request.form['checkout']
+        guests = request.form['guests']
+        beds = request.form['beds']
+        accessible = request.form['accessible']
+
+        kings = request.form['kings']
+        kingsingles = request.form['kingsingles']
+        families = request.form['families']
+        familyaccessibles = request.form['familyaccessibles']
+        if status:
+            db = get_db()
+
+            email = session.get('user_email')
+
+            rows = db.cursor().execute('SELECT id FROM customers WHERE email="' + email + '"').fetchall()
+            userid = rows[0][0]
+
+            db.cursor().execute('INSERT INTO bookings (customer_id, check_in, check_out, no_guests, no_beds, no_accessible) VALUES ("' + userid + '", "' + checkin '", "' + checkout + '", ' + guests + ', ' + beds + ', ' + accessible + ')')
+        else:
+            return redirect(url_for('.login'))
+    else:
+        return render_template('book.html')
+
+@app.route('/rooms')
+def rooms():
+    return render_template('rooms.html')
 
 @app.route('/getsession')
 def getsession():

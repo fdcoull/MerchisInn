@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Book your stay:</h1>
+<form action="" method="post" name="form">
+	<div class="form-group">
+		<label for="checkin">Check in:</label>
+		<input type="date" class="form-control" id="checkin" name="checkin">
+	</div>
+	<div class="form-group">
+                <label for="checkout">Check out:</label>
+                <input type="date" class="form-control" id="checkout" name="checkout">
+        </div>
+	<div class="form-group">
+                <label for="guests">Guests:</label>
+                <input type="number" class="form-control" id="guests" name="guests">
+        </div>
+	<div class="form-group">
+                <label for="beds">Beds:</label>
+                <input type="number" class="form-control" id="beds" name="beds">
+        </div>
+	<div class="form-group">
+                <label for="accessible">Number of guests requiring accessible room:</label>
+                <input type="number" class="form-control" id="accessible" name="accessible">
+        </div>
+	<hr/>
+	<div class="form-group">
+                <label for="kings">King Rooms:</label>
+                <input type="number" class="form-control" id="kings" name="kings">
+        </div>
+	<div class="form-group">
+                <label for="kingsingles">King and Single Rooms:</label>
+                <input type="number" class="form-control" id="kingsingles" name="kingsingles">
+        </div>
+	<div class="form-group">
+                <label for="families">Family Rooms:</label>
+                <input type="number" class="form-control" id="familes" name="families">
+        </div>
+	<div class="form-group">
+                <label for="familyaccessibles">Family Accessible Rooms:</label>
+                <input type="number" class="form-control" id="familyaccessibles" name="familyaccessibles">
+        </div>
+	<input type="submit" name="submit" id="submit"/>
+
+</form>
+{% endblock %}
