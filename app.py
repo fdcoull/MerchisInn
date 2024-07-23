@@ -114,7 +114,7 @@ def register():
         session['logged_in'] = True
 
         test = firstname + surname + email + password
-        return test
+        return redirect(url_for('.account'))
     else:
         return render_template('register.html')
 
