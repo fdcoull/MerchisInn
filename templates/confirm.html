@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Booking confirmed!</h1>
+<p>Room: {{ room  }}</p>
+<p>Check in: {{ checkin }}</p>
+<p>Check out: {{ checkout }}</p>
+<p>Guests: {{ guests }}</p>
+<p>Guests requiring accessible: {{ accessible }}</p>
+<a href="/account">Click to go to your account page</a>
+{% endblock %}
+

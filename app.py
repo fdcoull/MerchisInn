@@ -182,15 +182,20 @@ def book():
             db.cursor().execute('INSERT INTO bookings (customer_id, room_id, check_in, check_out, no_guests, accessible) VALUES ('+ str(customerid) +', '+ str(roomid) +', "'+ checkin +'", "'+ checkout +'", '+ str(guests) +', '+ str(accessible) +')')
             db.commit()
 
-            return str(roomid)
+            return redirect(url_for('.confirm', room=roomid, checkin=checkin, checkout=checkout, guests=guests, accessible=accessible))
         else:
             return redirect(url_for('.login'))
     else:
         return render_template('book.html')
 
-@app.route('/rooms')
-def rooms():
-    return render_template('rooms.html')
+@app.route('/confirm')
+def confirm():
+    room = request.args.get('room', '')
+    checkin = request.args.get('checkin', '')
+    checkout = request.args.get('checkout', '')
+    guests = request.args.get('guests', '')
+    accessible = request.args.get('accessible', '')
+    return render_template('confirm.html', room=room, checkin=checkin, checkout=checkout, guests=guests, accessible=accessible)
 
 @app.route('/getsession')
 def getsession():
