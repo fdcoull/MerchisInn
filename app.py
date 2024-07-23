@@ -125,25 +125,64 @@ def book():
     if request.method == 'POST':
         status = session.get('logged_in', False)
 
+        room = request.form['room']
         checkin = request.form['checkin']
         checkout = request.form['checkout']
         guests = request.form['guests']
-        beds = request.form['beds']
         accessible = request.form['accessible']
 
-        kings = request.form['kings']
-        kingsingles = request.form['kingsingles']
-        families = request.form['families']
-        familyaccessibles = request.form['familyaccessibles']
         if status:
             db = get_db()
 
             email = session.get('user_email')
 
-            rows = db.cursor().execute('SELECT id FROM customers WHERE email="' + email + '"').fetchall()
-            userid = rows[0][0]
+            if accessible == "":
+                accessible == 0
 
-            db.cursor().execute('INSERT INTO bookings (customer_id, check_in, check_out, no_guests, no_beds, no_accessible) VALUES ("' + userid + '", "' + checkin '", "' + checkout + '", ' + guests + ', ' + beds + ', ' + accessible + ')')
+            rows = db.cursor().execute('SELECT id FROM customers WHERE email="' + email + '"').fetchall()
+            customerid = rows[0][0]
+            
+            if room == "king":
+                #Check king rooms
+                rows = db.cursor().execute('SELECT * FROM rooms WHERE (id <= 5 AND id NOT IN (SELECT room_id FROM bookings WHERE check_in<="'+ checkout +'" AND check_out>="'+ checkin +'"))').fetchall()
+                
+                if len(rows) >= 1:
+                    roomid = rows[0][0]
+                else:
+                    return redirect(url_for('.book', error = "not_available"))
+
+            elif room == "kingsingle":
+                #Check king singles
+                rows = db.cursor().execute('SELECT * FROM rooms WHERE (id >= 6 AND id <= 7 AND id NOT IN (SELECT room_id FROM bookings WHERE check_in<="'+ checkout +'" AND check_out>="'+ checkin +'"))').fetchall()
+
+                if len(rows) >= 1:
+                    roomid = rows[0][0]
+                else:
+                    return redirect(url_for('.book', error = "not_available"))
+            elif room == "family":
+                #Check family
+                rows = db.cursor().execute('SELECT * FROM rooms WHERE (id >= 8 AND id <= 9 AND id NOT IN (SELECT room_id FROM bookings WHERE check_in<="'+ checkout +'" AND check_out>="'+ checkin +'"))').fetchall()
+
+                if len(rows) >= 1:
+                    roomid = rows[0][0]
+                else:
+                    return redirect(url_for('.book', error = "not_available"))
+            elif room == "accessible":
+                #Check accessible
+                rows = db.cursor().execute('SELECT * FROM rooms WHERE (id == 10 AND id NOT IN (SELECT room_id FROM bookings WHERE check_in<="'+ checkout +'" AND check_out>="'+ checkin +'"))').fetchall()
+
+                if len(rows) >= 1:
+                    roomid = rows[0][0]
+                else:
+                    return redirect(url_for('.book', error = "not_available"))
+
+            else:
+                return redirect(url_for('.book'))
+            
+            db.cursor().execute('INSERT INTO bookings (customer_id, room_id, check_in, check_out, no_guests, accessible) VALUES ('+ str(customerid) +', '+ str(roomid) +', "'+ checkin +'", "'+ checkout +'", '+ str(guests) +', '+ str(accessible) +')')
+            db.commit()
+
+            return str(roomid)
         else:
             return redirect(url_for('.login'))
     else:

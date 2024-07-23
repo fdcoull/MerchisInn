@@ -2,6 +2,15 @@
 {% block content %}
 <h1>Book your stay:</h1>
 <form action="" method="post" name="form">
+	<div class ="form-group">
+		<label for="room">Room selection:</label>
+		<select name="room" id="room">
+			<option value="king">King Room (1 double bed)</option>
+			<option value="kingsingle">King and Single Room (1 double bed and 1 single bed)</option>
+			<option value="family">Family Room (1 double bed and 2 singles)</option>
+			<option value="accessible">Accessible Room (Family room with accessibility)</option>
+		</select>
+	</div>
 	<div class="form-group">
 		<label for="checkin">Check in:</label>
 		<input type="date" class="form-control" id="checkin" name="checkin">
@@ -15,12 +24,8 @@
                 <input type="number" class="form-control" id="guests" name="guests">
         </div>
 	<div class="form-group">
-                <label for="beds">Beds:</label>
-                <input type="number" class="form-control" id="beds" name="beds">
-        </div>
-	<div class="form-group">
                 <label for="accessible">Number of guests requiring accessible room:</label>
-                <input type="number" class="form-control" id="accessible" name="accessible">
+                <input type="number" value="0" class="form-control" id="accessible" name="accessible">
         </div>
 	<hr/>
 	<div class="form-group">
@@ -37,7 +42,7 @@
         </div>
 	<div class="form-group">
                 <label for="familyaccessibles">Family Accessible Rooms:</label>
-                <input type="number" class="form-control" id="familyaccessibles" name="familyaccessibles">
+                <input type="number" value="0" class="form-control" id="familyaccessibles" name="familyaccessibles">
         </div>
 	<input type="submit" name="submit" id="submit"/>
 

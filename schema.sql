@@ -17,11 +17,11 @@ CREATE TABLE customers (
 CREATE TABLE bookings (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         customer_id INTEGER,
+	room_id INTEGER,
         check_in TEXT,
         check_out TEXT,
         no_guests INTEGER,
-        no_beds INTEGER,
-        no_accessible INTEGER
+        accessible INTEGER
 );
 
 CREATE TABLE rooms (
@@ -29,12 +29,6 @@ CREATE TABLE rooms (
         no_king INTEGER,
         no_single INTEGER,
         accessible INTEGER
-);
-
-CREATE TABLE allocations (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        booking_id INTEGER,
-        room_id INTEGER
 );
 
 CREATE TABLE admins (
@@ -59,4 +53,4 @@ INSERT INTO rooms (no_king, no_single, accessible) VALUES (2, 2, 0);
 INSERT INTO rooms (no_king, no_single, accessible) VALUES (2, 2, 0);
 
 -- Accessible rooms
-INSERT INTO rooms (no_king, no_single, accessible) VALUES (0, 0, 4);
+INSERT INTO rooms (no_king, no_single, accessible) VALUES (2, 2, 1);
