@@ -14,6 +14,9 @@ Then to generate a key, open the python3 terminal and type the following:
 
 Then copy the string output to your etc/key.cfg secret_key line 
 
+Add an admin account by running:
+* python3 init_admin.py
+
 From here, just run the app using: 
 * flask --app app run --host=0.0.0.0 --port=8080 
 

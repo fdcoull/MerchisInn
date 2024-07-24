@@ -212,7 +212,7 @@ def book():
             db.cursor().execute('INSERT INTO bookings (customer_id, room_id, check_in, check_out, no_guests, accessible, price) VALUES ('+ str(customerid) +', '+ str(roomid) +', "'+ checkin +'", "'+ checkout +'", '+ str(guests) +', '+ str(accessible) +', '+ formattedprice +')')
             db.commit()
 
-            return redirect(url_for('.confirm', room=roomid, checkin=checkin, checkout=checkout, guests=guests, accessible=accessible, preorderdays=preorderdays, price=totalprice))
+            return redirect(url_for('.confirm', room=roomid, checkin=checkin, checkout=checkout, guests=guests, accessible=accessible, price=totalprice))
         else:
             return redirect(url_for('.login'))
     else:
@@ -228,17 +228,21 @@ def confirm():
     price = request.args.get('price', '')
     return render_template('confirm.html', room=room, checkin=checkin, checkout=checkout, guests=guests, accessible=accessible, price=price)
 
-@app.route('/getsession')
-def getsession():
-    email = session.get('user_email')
-    if email is not None:
-        return 'Email: ' + email
-    return 'Not logged in'
+@app.route('/admin')
+def admin():
+    admin = session.get('admin', False)
 
-@app.route('/delsession')
-def delsession():
-    session.pop('user_email', None)
-    return "Logged out"
+    if admin:
+        return render_template('admin.html')
+    else:
+        return redirect(url_for('.adminlogin'))
+
+@app.route('/admin/login', methods=['GET', 'POST'])
+def adminlogin():
+    if request.method == 'POST':
+        print("test")
+    else:
+        return render_template('admin-login.html')
 
 if __name__ == ("__main__"):
     app.run(host='0.0.0.0', debug=True)
