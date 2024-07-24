@@ -228,21 +228,41 @@ def confirm():
     price = request.args.get('price', '')
     return render_template('confirm.html', room=room, checkin=checkin, checkout=checkout, guests=guests, accessible=accessible, price=price)
 
-@app.route('/admin')
+@app.route('/admin', methods=['GET', 'POST'])
 def admin():
-    admin = session.get('admin', False)
+    admin = session.get('admin_email', False)
 
     if admin:
-        return render_template('admin.html')
+        if request.method == 'POST':
+            date = request.form['date']
+        else:
+            date = datetime.now().date()
+        db = get_db()
+        bookings = db.cursor().execute('SELECT bookings.id, bookings.customer_id, customers.email, bookings.check_in, bookings.check_out, bookings.no_guests, bookings.accessible, bookings.price FROM bookings INNER JOIN customers ON bookings.customer_id=customers.id WHERE "'+ str(date) +'" BETWEEN check_in AND check_out').fetchall()
+        return render_template('admin.html', bookings=bookings, date=date)
     else:
         return redirect(url_for('.adminlogin'))
 
 @app.route('/admin/login', methods=['GET', 'POST'])
 def adminlogin():
     if request.method == 'POST':
-        print("test")
+        email = request.form['email']
+        password = request.form['password']
+
+        db = get_db()
+        rows = db.cursor().execute('SELECT password FROM admins WHERE email="'+ email +'"').fetchall()
+        if rows[0][0].encode('utf-8') == bcrypt.hashpw(password.encode('utf-8'), rows[0][0].encode('utf-8')):
+            session['admin_email'] = email
+            return redirect(url_for('admin'))
+        else:
+            return redirect(url_for('.adminlogin'))
     else:
         return render_template('admin-login.html')
+
+@app.route('/admin/logout')
+def adminlogout():
+    session['admin_email'] = ""
+    return redirect(url_for('.admin'))
 
 if __name__ == ("__main__"):
     app.run(host='0.0.0.0', debug=True)
