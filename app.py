@@ -264,5 +264,9 @@ def adminlogout():
     session['admin_email'] = ""
     return redirect(url_for('.admin'))
 
+@app.errorhandler(404)
+def error404(error):
+    return render_template('error-404.html')
+
 if __name__ == ("__main__"):
     app.run(host='0.0.0.0', debug=True)
